@@ -7,6 +7,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import ru.okhremenko.springcourse.FirstSecurityApp.services.PersonDetailsService;
@@ -24,8 +25,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception{
         //Конфигурируем сам Spring Security
         //Конфигурируем авторизацию
-        http.csrf().disable() //отключаем защиту от межсайтовой подделки запросов
-                .authorizeRequests()
+        http.authorizeRequests()
                 .antMatchers("/auth/login","/auth/registration", "/error").permitAll()
                 .anyRequest().authenticated() //Авторизация
                 .and()
@@ -42,11 +42,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     //Настраиваем аутентификацию
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(personDetailsService);
+        auth.userDetailsService(personDetailsService)
+                .passwordEncoder(getPasswordEncoder());
     }
 
     @Bean
     public PasswordEncoder getPasswordEncoder() {
-        return NoOpPasswordEncoder.getInstance();
+        return new BCryptPasswordEncoder();
     }
 }
